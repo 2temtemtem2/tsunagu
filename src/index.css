@@ -26,15 +26,17 @@ body {
 .topbar h1 span { color:var(--accent); }
 .sub { font-size:12px; color:var(--muted); margin-top:2px; }
 .tabbar {
-  position:absolute; bottom:0; left:0; right:0; height:66px; background:#fff;
+  position:absolute; bottom:0; left:0; right:0; height:58px; background:#fff;
   border-top:1px solid var(--line); display:flex; align-items:stretch;
 }
 .tab {
-  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:3px; font-size:10px; color:var(--muted); cursor:pointer; border:none; background:none;
+  flex:1; display:flex; align-items:center; justify-content:center;
+  color:var(--muted); cursor:pointer; border:none; background:none;
+  position:relative;
 }
-.tab.active { color:var(--accent); font-weight:700; }
-.tab .ic { font-size:20px; line-height:1; }
+.tab.active { color:var(--navy); }
+.tab-ic { font-size:26px; line-height:1; transition: transform .1s; }
+.tab.active .tab-ic { transform: scale(1.15); }
 .stories { display:flex; gap:14px; overflow-x:auto; padding:12px 16px 8px; }
 .stories::-webkit-scrollbar { display:none; }
 .story { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer; width:62px; }
@@ -129,6 +131,7 @@ textarea { resize:none; height:60px; }
 }
 .fcard:active { box-shadow: 0 1px 4px rgba(31,58,95,.08); }
 .fcard-top { display: flex; align-items: center; gap: 12px; }
+.fcard-chevron { color: var(--muted); font-size: 13px; font-weight: 700; line-height: 1; }
 .fcard-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .fcard-want {
   font-size: 13px; color: var(--navy); background: #f0f4fa;
@@ -169,7 +172,7 @@ textarea { resize:none; height:60px; }
 }
 .invite-logo { font-size: 32px; font-weight: 800; color: var(--navy); margin-bottom: 12px; }
 .invite-logo span { color: var(--accent); }
-.invite-catch { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.invite-catch { font-size: 26px; font-weight: 800; color: var(--navy); margin-bottom: 12px; line-height: 1.4; }
 .invite-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
 .invite-form { width: 100%; }
 .invite-error { font-size: 12px; color: var(--pink); margin-top: 6px; }
