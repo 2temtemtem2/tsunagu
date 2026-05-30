@@ -303,8 +303,27 @@ function ProfileScreen({ profile, userId, onSave, onToast }) {
   const [wantOn, setWantOn] = useState(profile?.want_on || false)
   const [wantText, setWantText] = useState(profile?.want_text || '')
   const [loading, setLoading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || null)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef(null)
 
   const toggleTag = (t) => setTags(ts => ts.includes(t) ? ts.filter(x => x !== t) : ts.length < 5 ? [...ts, t] : ts)
+
+  const uploadAvatar = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    const ext = file.name.split('.').pop()
+    const path = `${userId}/avatar.${ext}`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (error) { onToast('アップロードに失敗しました'); setUploading(false); return }
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    const url = data.publicUrl + '?t=' + Date.now()
+    await supabase.from('profiles').update({ avatar_url: url }).eq('id', userId)
+    setAvatarUrl(url)
+    setUploading(false)
+    onToast('アイコンを変更しました')
+  }
 
   const save = async () => {
     setLoading(true)
@@ -318,7 +337,7 @@ function ProfileScreen({ profile, userId, onSave, onToast }) {
     }).eq('id', userId)
     setLoading(false)
     if (error) { onToast('保存に失敗しました'); return }
-    onSave({ name, age, bio, tags, want_on: wantOn, want_text: wantText })
+    onSave({ name, age, bio, tags, want_on: wantOn, want_text: wantText, avatar_url: avatarUrl })
     onToast('保存しました')
   }
 
@@ -327,8 +346,16 @@ function ProfileScreen({ profile, userId, onSave, onToast }) {
       <div className="topbar"><h1>プロ<span>フィール</span></h1><div className="sub">友達があなたを紹介するときに表示されます</div></div>
       <div className="wrap">
         <div className="card" style={{ textAlign: 'center', paddingTop: 24 }}>
-          <div className="avatar" style={{ background: '#E8743B', width: 72, height: 72, fontSize: 28, margin: '0 auto 16px' }}>
-            {initial(name || '?')}
+          <div style={{ position: 'relative', width: 80, margin: '0 auto 16px' }}>
+            {avatarUrl
+              ? <img src={avatarUrl} alt="avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
+              : <div className="avatar" style={{ background: '#E8743B', width: 80, height: 80, fontSize: 30, margin: '0 auto' }}>{initial(name || '?')}</div>
+            }
+            <button onClick={() => fileRef.current?.click()}
+              style={{ position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', border: '2px solid #fff', color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {uploading ? '…' : '✎'}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadAvatar} />
           </div>
           <div className="section-title" style={{ marginLeft: 0, textAlign: 'left' }}>名前</div>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="名前を入力" />
