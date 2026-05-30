@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { friends, initialChats, initial } from './data'
+import { supabase } from './supabase'
+import Auth from './Auth'
 import './index.css'
 
 function Toast({ msg }) {
@@ -431,6 +433,9 @@ function InviteScreen({ onToast }) {
 }
 
 export default function App() {
+  const [user, setUser] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [entered, setEntered] = useState(false)
   const [invitedBy, setInvitedBy] = useState(null)
   const [tab, setTab] = useState('home')
@@ -438,8 +443,42 @@ export default function App() {
   const [introPickA, setIntroPickA] = useState(null)
   const [chats, setChats] = useState(initialChats)
   const [notifications, setNotifications] = useState([])
-  const [profile, setProfile] = useState({ name: '', age: '', bio: '', tags: [], wantOn: false, wantText: '' })
   const toastTimer = useRef(null)
+
+  // Supabase 認証状態を監視
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user)
+        loadProfile(session.user.id)
+      }
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        loadProfile(session.user.id)
+      } else {
+        setUser(null)
+        setProfile(null)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const loadProfile = async (userId) => {
+    const { data } = await supabase.from('profiles').select('*, inviter:invited_by(name)').eq('id', userId).single()
+    if (data) {
+      setProfile(data)
+      if (data.inviter) setInvitedBy(data.inviter.name)
+      setEntered(true)
+    }
+  }
+
+  const handleAuth = (authUser) => {
+    setUser(authUser)
+    loadProfile(authUser.id)
+  }
 
   const showToast = (msg) => {
     setToast(msg)
@@ -491,11 +530,20 @@ export default function App() {
     ["profile", "🙂", "マイページ"],
   ]
 
-  if (!entered) return (
+  if (authLoading) return (
     <div className="phone">
       <div className="statusbar">9:41　　Tsunagu　　●●●</div>
       <div className="screen" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <InviteEntryScreen onEnter={handleEnter} />
+        <div style={{ color: 'var(--muted)', fontSize: 14 }}>読み込み中…</div>
+      </div>
+    </div>
+  )
+
+  if (!user) return (
+    <div className="phone">
+      <div className="statusbar">9:41　　Tsunagu　　●●●</div>
+      <div className="screen">
+        <Auth onAuth={handleAuth} />
       </div>
     </div>
   )

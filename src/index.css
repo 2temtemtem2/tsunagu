@@ -204,4 +204,16 @@ textarea { resize:none; height:60px; }
   background: #e3f6ed; color: var(--green); font-size: 12px; font-weight: 700;
   text-align: center; padding: 6px 12px;
 }
+/* 認証画面 */
+.auth-screen {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 28px 32px; width: 100%; min-height: 100%;
+}
+.auth-form { width: 100%; margin-top: 28px; }
+.auth-label { font-size: 12px; font-weight: 700; color: var(--navy); margin: 14px 0 4px; }
+.auth-switch {
+  display: block; width: 100%; text-align: center; margin-top: 16px;
+  font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer;
+  text-decoration: underline;
+}
 .toast { position:absolute; bottom:84px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; font-size:13px; padding:10px 18px; border-radius:24px; z-index:50; box-shadow:0 8px 20px rgba(0,0,0,.25); animation:up .2s; white-space:nowrap; }
