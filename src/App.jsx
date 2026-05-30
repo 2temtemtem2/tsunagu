@@ -13,6 +13,20 @@ function colorize(profiles) {
   return profiles.map((p, i) => ({ ...p, _c: col(i) }))
 }
 
+// アバター（画像 or 頭文字）
+function Avatar({ profile, size = 48, fontSize }) {
+  const fs = fontSize || Math.round(size * 0.4)
+  if (profile?.avatar_url) {
+    return <img src={profile.avatar_url} alt={profile.name}
+      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+  }
+  return (
+    <div className="avatar" style={{ background: profile?._c || '#ccc', width: size, height: size, fontSize: fs }}>
+      {initial(profile?.name)}
+    </div>
+  )
+}
+
 // 相手のプロフィールを取得
 function getOther(intro, userId) {
   return intro.person_a_id === userId ? intro.person_b : intro.person_a
@@ -29,7 +43,7 @@ function FriendCard({ f, onIntroFrom }) {
   return (
     <div className="fcard" onClick={() => setOpen(v => !v)}>
       <div className="fcard-top">
-        <div className="avatar" style={{ background: f._c, width: 52, height: 52, fontSize: 20 }}>{initial(f.name)}</div>
+        <Avatar profile={f} size={52} />
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span className="name">{f.name}</span>
@@ -202,7 +216,7 @@ function ChatsScreen({ introductions, userId, onLike, onPass, profiles }) {
       <>
         <div className="chathead">
           <button className="back" onClick={() => setActiveIntro(null)}>‹</button>
-          <div className="avatar" style={{ background: color, width: 38, height: 38, fontSize: 15 }}>{initial(other?.name)}</div>
+          <Avatar profile={{ ...otherProfile, name: other?.name }} size={38} />
           <div>
             <div className="name">{other?.name}</div>
             <div className="meta">{activeIntro.introducer?.name}さんの紹介</div>
@@ -241,7 +255,7 @@ function ChatsScreen({ introductions, userId, onLike, onPass, profiles }) {
                 <div key={intro.id} className="notif-card">
                   <div className="notif-type">{intro.introducer?.name}さんからの紹介</div>
                   <div className="row" style={{ marginTop: 10 }}>
-                    <div className="avatar" style={{ background: otherProfile?._c || '#ccc', width: 48, height: 48 }}>{initial(other?.name)}</div>
+                    <Avatar profile={{ ...otherProfile, name: other?.name }} size={48} />
                     <div style={{ flex: 1 }}>
                       <div className="name">{other?.name} {other?.age && <span className="meta">{other.age}歳</span>}</div>
                       <div style={{ marginTop: 4 }}>{(other?.tags || []).map(t => <span key={t} className="tag">#{t}</span>)}</div>
@@ -267,7 +281,7 @@ function ChatsScreen({ introductions, userId, onLike, onPass, profiles }) {
               return (
                 <div key={intro.id} className="card" style={{ cursor: 'pointer' }} onClick={() => openChat(intro)}>
                   <div className="row">
-                    <div className="avatar" style={{ background: otherProfile?._c || '#ccc', width: 48, height: 48 }}>{initial(other?.name)}</div>
+                    <Avatar profile={{ ...otherProfile, name: other?.name }} size={48} />
                     <div style={{ flex: 1 }}>
                       <div className="name">{other?.name}</div>
                       <div className="meta">{intro.introducer?.name}さんの紹介</div>
