@@ -98,6 +98,9 @@ export default function Auth({ onAuth }) {
           <button className="btn primary" style={{ marginTop: 12 }} onClick={handleSignup} disabled={loading}>
             {loading ? '登録中…' : '参加する'}
           </button>
+          <button className="auth-switch" onClick={() => { setMode('login'); setError('') }}>
+            すでにアカウントがある方はこちら
+          </button>
         </div>
       )}
 
