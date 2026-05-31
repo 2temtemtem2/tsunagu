@@ -477,13 +477,20 @@ export default function App() {
   }, [])
 
   const loadAll = async (userId) => {
-    // プロフィール
+    // 自分のプロフィール
     const { data: p } = await supabase.from('profiles').select('*').eq('id', userId).single()
     if (p) setProfile(p)
 
-    // 他のユーザー
-    const { data: ps } = await supabase.from('profiles').select('*').neq('id', userId)
-    if (ps) setProfiles(colorize(ps))
+    // 友達 = 自分が招待した人 + 自分を招待した人
+    const { data: invitedByMe } = await supabase.from('profiles').select('*').eq('invited_by', userId)
+    const { data: myProfile } = await supabase.from('profiles').select('invited_by').eq('id', userId).single()
+
+    let friendList = [...(invitedByMe || [])]
+    if (myProfile?.invited_by) {
+      const { data: inviter } = await supabase.from('profiles').select('*').eq('id', myProfile.invited_by).single()
+      if (inviter) friendList = [inviter, ...friendList]
+    }
+    setProfiles(colorize(friendList))
 
     // 紹介
     await loadIntroductions(userId)
@@ -523,6 +530,7 @@ export default function App() {
     ["home",    "👥", "友達"],
     ["intro",   "🤝", "紹介"],
     ["chats",   "💬", "つながり"],
+    ["invite",  "📨", "招待"],
     ["profile", "🙂", "マイページ"],
   ]
 
@@ -549,6 +557,7 @@ export default function App() {
         {tab === 'home'    && <HomeScreen profiles={profiles} onIntroFrom={f => { setIntroPickA(f); setTab('intro') }} />}
         {tab === 'intro'   && <IntroScreen profiles={profiles} userId={user.id} onToast={showToast} onSendIntro={() => { loadIntroductions(); setTab('chats') }} />}
         {tab === 'chats'   && <ChatsScreen introductions={introductions} userId={user.id} profiles={profiles} onLike={handleLike} onPass={handlePass} />}
+        {tab === 'invite'  && <InviteScreen profile={profile} profiles={profiles} onToast={showToast} />}
         {tab === 'profile' && <ProfileScreen profile={profile} userId={user.id} onSave={setProfile} onToast={showToast} />}
       </div>
       <div className="tabbar">
